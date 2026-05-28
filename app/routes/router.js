@@ -1,53 +1,23 @@
 var express = require("express");
 var router = express.Router();
-const { tarefasModel } = require("../models/tarefasModel"); //usar sempre o {}
-const moment = require("moment");
-moment.locale('pt-br');
+const tarefasController = require("../controllers/tarefasController");
 
-router.get("/", async function (req, res) {
-    res.locals.moment = moment;
-    try {
-        const result = await tarefasModel.findAll();
-        console.log(result)
-        res.render("pages/index", { listaTarefas: result })
-    } catch (erro) {
-        console.log(erro);
-    }
-});
+// Rota para listar todas as tarefas (GET /)
+router.get("/", tarefasController.listaTarefas);
 
+// Rota para exibir formulário de nova tarefa (GET /nova-tarefa)
+router.get("/nova-tarefa", tarefasController.novaForm);
 
-router.get("/nova-tarefa", (req, res) => {
-    res.locals.moment = moment;
-    res.render("pages/cadastro",
-        {
-            tituloPagina: "Cadastro de Tarefas", tituloAba: "Cadastro",
-            tarefa: {
-                id_tarefa: 0, nome_tarefa: "",
-                prazo_tarefa: "", situacao_tarefa: 1
-            }
-        });
-});
+// Rota para exibir formulário de edição (GET /editar?id=...)
+router.get("/editar", tarefasController.editarForm);
 
-router.post("/manter-tarefa", async (req, res) => {
-    const objDados = {
-        id : req.body.id,
-        nome: req.body.nome,
-        prazo: req.body.prazo,
-        situacao: req.body.situacao
-    }
+// Rota para salvar/atualizar tarefa (POST /manter-tarefa)
+router.post("/manter-tarefa", tarefasController.manter);
 
-    try {
-        if(objDados.id == 0){
-            const result = await tarefasModel.create(objDados);  
-        }else{
-            const result = await tarefasModel.update(objDados);  
-        }
-        
-        res.redirect("/");
-    } catch (erro) {
-        console.log(erro);
-    }
-})
+// Rota para deletar tarefa logicamente (GET /deletar-logico?id=...)
+router.get("/deletar-logico", tarefasController.deletarLogico);
+
+module.exports = router;
 
 
 router.get("/editar", async (req, res) => {
